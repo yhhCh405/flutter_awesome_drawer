@@ -2,6 +2,7 @@ import 'package:awesome_drawer/src/Models/drawer_items.dart';
 import 'package:awesome_drawer/src/Models/drawer_type.dart';
 import 'package:awesome_drawer/src/Presenters/awesome_drawer_contract.dart';
 import 'package:awesome_drawer/src/Presenters/awesome_drawer_impl.dart';
+
 ///Copyright 2020 by Ye Htet Hein. All rights reserved.
 import 'package:flutter/material.dart';
 
@@ -23,42 +24,52 @@ class AwesomeDrawer extends StatefulWidget {
   final double childRadius;
   final AppBar appBar;
 
+  final Color backgroundColor;
+  final Color drawerHeaderSpaceColor;
+  final Color drawerBodySpaceColor;
+
   DrawerType _drawerType;
 
-  AwesomeDrawer({
-    this.child,
-    this.drawerHeader,
-    this.drawerItems,
-    final DrawerType drawerType,
-    this.drawer,
-    this.childRadius,
-    this.appBar,
-    this.drawerPercent,
-  }){
+  AwesomeDrawer(
+      {this.child,
+      this.drawerHeader,
+      this.drawerItems,
+      final DrawerType drawerType,
+      this.drawer,
+      this.childRadius,
+      this.appBar,
+      this.drawerPercent,
+      this.backgroundColor,
+      this.drawerHeaderSpaceColor,
+      this.drawerBodySpaceColor}) {
     this._drawerType = drawerType ?? DrawerType.Slide;
   }
 
-  AwesomeDrawer.slide({
-    this.child,
-    this.drawerHeader,
-    this.drawerItems,
-    this.drawer,
-    this.childRadius,
-    this.appBar,
-    this.drawerPercent,
-  }) {
+  AwesomeDrawer.slide(
+      {this.child,
+      this.drawerHeader,
+      this.drawerItems,
+      this.drawer,
+      this.childRadius,
+      this.appBar,
+      this.drawerPercent,
+      this.backgroundColor,
+      this.drawerHeaderSpaceColor,
+      this.drawerBodySpaceColor}) {
     this._drawerType = DrawerType.Slide;
   }
 
-  AwesomeDrawer.scale({
-    this.child,
-    this.drawerHeader,
-    this.drawerItems,
-    this.drawer,
-    this.childRadius,
-    this.appBar,
-    this.drawerPercent,
-  }) {
+  AwesomeDrawer.scale(
+      {this.child,
+      this.drawerHeader,
+      this.drawerItems,
+      this.drawer,
+      this.childRadius,
+      this.appBar,
+      this.drawerPercent,
+      this.backgroundColor,
+      this.drawerHeaderSpaceColor,
+      this.drawerBodySpaceColor}) {
     this._drawerType = DrawerType.Scale;
   }
 
@@ -111,7 +122,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           transform: presenter.drawerTransform(isopended.data),
           width: presenter.drawerWidth(isopended.data),
           height: presenter.drawerHeight(isopended.data),
-          color: Colors.blueGrey[800],
+          color: widget.backgroundColor ?? Colors.blueGrey[800],
           child: Row(
             children: [
               Container(
@@ -131,6 +142,25 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                       ],
                     ),
               ),
+              Expanded(
+                  child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      color: widget.drawerHeaderSpaceColor ??
+                          widget.drawerBodySpaceColor ??
+                          widget.backgroundColor,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: widget.drawerBodySpaceColor ??
+                          widget.drawerHeaderSpaceColor ??
+                          widget.backgroundColor,
+                    ),
+                  ),
+                ],
+              ))
             ],
           ),
         );
@@ -186,12 +216,10 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           child: ClipRRect(
             borderRadius: BorderRadius.only(
                 topLeft: presenter
-                    .childBorderRadius(
-                        isopended.data, widget.childRadius)
+                    .childBorderRadius(isopended.data, widget.childRadius)
                     .topLeft,
                 topRight: presenter
-                    .childBorderRadius(
-                        isopended.data, widget.childRadius)
+                    .childBorderRadius(isopended.data, widget.childRadius)
                     .topRight),
             child: userAppBar ??
                 AppBar(
