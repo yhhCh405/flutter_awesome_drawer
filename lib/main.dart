@@ -27,9 +27,7 @@ class MyHome extends StatelessWidget {
         AwesomeDrawerItems(
             icon: Icon(Icons.wallet_giftcard),
             child: Text("Gift card"),
-            onTap: () {
-              print("gcgcgc");
-            }),
+            onTap: () {}),
         AwesomeDrawerItems(
             icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
         AwesomeDrawerItems(

@@ -11,9 +11,15 @@ class AwesomeDrawerPresenter implements AwesomeDrawerPresenterImpl {
   DrawerProperties drawerProperties;
   DrawerState drawerState;
 
+  DrawerType drawerType;
+
+  double dragWidth = 0;
+
+  int drawerPercent;
+
   void _determineDrawerProperties() {
     this.drawerProperties = DrawerProperties(
-        opendedWidth: MediaQuery.of(context).size.width * 0.7,
+        opendedWidth: MediaQuery.of(context).size.width * (drawerPercent / 100),
         opendedHeight: MediaQuery.of(context).size.height,
         closedWidth: 0,
         closedHeight: MediaQuery.of(context).size.height,
@@ -24,92 +30,94 @@ class AwesomeDrawerPresenter implements AwesomeDrawerPresenterImpl {
   double get fullWidth => MediaQuery.of(context).size.width;
   double get fullHeight => MediaQuery.of(context).size.height;
 
-  Matrix4 childTransform(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
+  Matrix4 childTransform(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
       return Matrix4.identity()
         ..translate(
-          isOpended
-              ? drawerProperties.opendedWidth
-              : drawerProperties.closedWidth,
+          dragWidth,
         );
-    } else if (type == DrawerType.Scale) {
-      if (isOpended) {
-        return Matrix4.translationValues(
-            200,
-            (MediaQuery.of(context).size.height +
-                    24 -
-                    MediaQuery.of(context).size.height * 0.8) /
-                2,
-            0)
-          ..scale(0.8);
-      } else {
-        return Matrix4.translationValues(0.0, 0.0, 0.0)..scale(1.0);
-      }
+    } else if (drawerType == DrawerType.Scale) {
+      return Matrix4.translationValues(
+          dragWidth,
+          isOpended
+              ? (MediaQuery.of(context).size.height +
+                      24 -
+                      MediaQuery.of(context).size.height * 0.8) /
+                  2
+              : 0.0,
+          0)
+        ..scale(isOpended ? 0.8 : 1.0);
     }
     return null;
   }
 
-  Matrix4 drawerTransform(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
+  Matrix4 drawerTransform(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
       return null;
-    } else if (type == DrawerType.Scale) {
+    } else if (drawerType == DrawerType.Scale) {
       return null;
     }
     return null;
   }
 
-  double drawerWidth(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
+  double drawerWidth(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
       return double.infinity;
-    } else if (type == DrawerType.Scale) {
+    } else if (drawerType == DrawerType.Scale) {
       return double.infinity;
     }
     return 0;
   }
 
-  double drawerActualWidth(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
+  double drawerActualWidth(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
       return drawerProperties.opendedWidth;
-    } else if (type == DrawerType.Scale) {
-      return 200; // drawerProperties.opendedWidth;
+    } else if (drawerType == DrawerType.Scale) {
+      return drawerProperties.opendedWidth;
     }
     return 0;
   }
 
-  double drawerHeight(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
+  double drawerHeight(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
       return double.infinity;
-    } else if (type == DrawerType.Scale) {
-      return double.infinity;
-    }
-    return 0;
-  }
-
-  double childWidth(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
-      return double.infinity;
-    } else if (type == DrawerType.Scale) {
+    } else if (drawerType == DrawerType.Scale) {
       return double.infinity;
     }
     return 0;
   }
 
-  double childHeight(bool isOpended, DrawerType type) {
-    if (type == DrawerType.Slide) {
+  double childWidth(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
       return double.infinity;
-    } else if (type == DrawerType.Scale) {
+    } else if (drawerType == DrawerType.Scale) {
       return double.infinity;
     }
     return 0;
   }
 
-  BorderRadius childBorderRadius(
-      bool isOpended, double childRadius, DrawerType type) {
-    if (type == DrawerType.Slide) return null;
+  double childHeight(bool isOpended) {
+    if (drawerType == DrawerType.Slide) {
+      return double.infinity;
+    } else if (drawerType == DrawerType.Scale) {
+      return double.infinity;
+    }
+    return 0;
+  }
+
+  BorderRadius childBorderRadius(bool isOpended, double childRadius) {
+    if (drawerType == DrawerType.Slide) return BorderRadius.zero;
     return BorderRadius.circular(isOpended ? childRadius ?? 20 : 0);
   }
 
   Duration get animDuration => Duration(milliseconds: 200);
+
+  toggleDrawer(bool isOpended) {
+    dragWidth = isOpended
+        ? drawerProperties.closedWidth
+        : drawerProperties.opendedWidth;
+    drawerState.isOpended.add(!isOpended);
+  }
 
   @override
   void registerView(AwesomeDrawerView view, BuildContext context) {
@@ -122,5 +130,34 @@ class AwesomeDrawerPresenter implements AwesomeDrawerPresenterImpl {
   @override
   void unRegisterView() {
     this.view = null;
+  }
+
+  @override
+  void handleChildEndGesture(DragEndDetails details) {
+    if (details.velocity.pixelsPerSecond.dx >= 1000) {
+      dragWidth = drawerProperties.opendedWidth;
+      drawerState.isOpended.add(true);
+    }
+
+    if (dragWidth < drawerProperties.opendedWidth &&
+        details.velocity.pixelsPerSecond.dx < 1000) {
+      dragWidth = drawerProperties.closedWidth;
+      drawerState.isOpended.add(false);
+    }
+    view.updateDrawerByGesture();
+  }
+
+  @override
+  void handleChildUpdateGesture(DragUpdateDetails details) {
+    double dx = details.globalPosition.dx;
+    if (dx > drawerProperties.opendedWidth) {
+      dragWidth = drawerProperties.opendedWidth;
+      drawerState.isOpended.add(true);
+    } else {
+      dragWidth = dx;
+      drawerState.isOpended.add(false);
+    }
+
+    view.updateDrawerByGesture();
   }
 }

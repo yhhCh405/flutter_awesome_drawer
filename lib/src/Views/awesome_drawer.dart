@@ -1,12 +1,8 @@
-
 import 'package:awesome_drawer/src/Models/drawer_items.dart';
-import 'package:awesome_drawer/src/Models/drawer_state.dart';
 import 'package:awesome_drawer/src/Models/drawer_type.dart';
 import 'package:awesome_drawer/src/Presenters/awesome_drawer_contract.dart';
 import 'package:awesome_drawer/src/Presenters/awesome_drawer_impl.dart';
-
 ///Copyright 2020 by Ye Htet Hein. All rights reserved.
-
 import 'package:flutter/material.dart';
 
 class AwesomeDrawer extends StatefulWidget {
@@ -20,20 +16,27 @@ class AwesomeDrawer extends StatefulWidget {
 
   /// The whole drawer widget. If use this widget, you don't need to use `drawerItems` and `drawerHeader`
   final Widget drawer;
+
+  /// Percentage (%) of drawer width to be open
+  final int drawerPercent;
+
   final double childRadius;
   final AppBar appBar;
 
-  DrawerType type;
+  DrawerType _drawerType;
 
   AwesomeDrawer({
     this.child,
     this.drawerHeader,
     this.drawerItems,
-    this.type = DrawerType.Slide,
+    final DrawerType drawerType,
     this.drawer,
     this.childRadius,
     this.appBar,
-  });
+    this.drawerPercent,
+  }){
+    this._drawerType = drawerType ?? DrawerType.Slide;
+  }
 
   AwesomeDrawer.slide({
     this.child,
@@ -42,8 +45,9 @@ class AwesomeDrawer extends StatefulWidget {
     this.drawer,
     this.childRadius,
     this.appBar,
+    this.drawerPercent,
   }) {
-    this.type = DrawerType.Slide;
+    this._drawerType = DrawerType.Slide;
   }
 
   AwesomeDrawer.scale({
@@ -53,8 +57,9 @@ class AwesomeDrawer extends StatefulWidget {
     this.drawer,
     this.childRadius,
     this.appBar,
+    this.drawerPercent,
   }) {
-    this.type = DrawerType.Scale;
+    this._drawerType = DrawerType.Scale;
   }
 
   @override
@@ -73,6 +78,8 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    presenter.drawerPercent = widget.drawerPercent ?? 60;
+    presenter.drawerType = widget._drawerType;
     presenter.registerView(this, context);
   }
 
@@ -101,15 +108,15 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
       builder: (context, isopended) {
         return AnimatedContainer(
           duration: presenter.animDuration,
-          transform: presenter.drawerTransform(isopended.data, widget.type),
-          width: presenter.drawerWidth(isopended.data, widget.type),
-          height: presenter.drawerHeight(isopended.data, widget.type),
+          transform: presenter.drawerTransform(isopended.data),
+          width: presenter.drawerWidth(isopended.data),
+          height: presenter.drawerHeight(isopended.data),
           color: Colors.blueGrey[800],
           child: Row(
             children: [
               Container(
-                width: presenter.drawerActualWidth(isopended.data, widget.type),
-                height: presenter.drawerHeight(isopended.data, widget.type),
+                width: presenter.drawerActualWidth(isopended.data),
+                height: presenter.drawerHeight(isopended.data),
                 child: widget.drawer ??
                     Column(
                       children: [
@@ -138,7 +145,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
             isopended ? Icons.close : Icons.menu,
           ),
           onPressed: () {
-            presenter.drawerState.isOpended.add(!isopended);
+            presenter.toggleDrawer(isopended);
           },
         );
 
@@ -180,11 +187,11 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
             borderRadius: BorderRadius.only(
                 topLeft: presenter
                     .childBorderRadius(
-                        isopended.data, widget.childRadius, widget.type)
+                        isopended.data, widget.childRadius)
                     .topLeft,
                 topRight: presenter
                     .childBorderRadius(
-                        isopended.data, widget.childRadius, widget.type)
+                        isopended.data, widget.childRadius)
                     .topRight),
             child: userAppBar ??
                 AppBar(
@@ -202,24 +209,29 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
       initialData: false,
       builder: (context, isopended) {
         return AnimatedContainer(
+          curve: Curves.easeInOut,
           duration: presenter.animDuration,
-          width: presenter.childWidth(isopended.data, widget.type),
-          height: presenter.childHeight(isopended.data, widget.type),
-          transform: presenter.childTransform(isopended.data, widget.type),
+          width: presenter.childWidth(isopended.data),
+          height: presenter.childHeight(isopended.data),
+          transform: presenter.childTransform(isopended.data),
           decoration: BoxDecoration(
               borderRadius: presenter.childBorderRadius(
-                  isopended.data, widget.childRadius, widget.type),
+                  isopended.data, widget.childRadius),
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black12,
+                    color: Colors.black26,
                     offset: Offset(-1.0, 0),
                     blurRadius: 5,
-                    spreadRadius: 3),
+                    spreadRadius: 5),
               ]),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [_appbar, widget.child ?? Container()],
+          child: GestureDetector(
+            onHorizontalDragUpdate: presenter.handleChildUpdateGesture,
+            onHorizontalDragEnd: presenter.handleChildEndGesture,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [_appbar, widget.child ?? Container()],
+              ),
             ),
           ),
         );
@@ -230,20 +242,33 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WillPopScope(
-        onWillPop: () {
-          return presenter.drawerState.isOpended.stream.last;
-        },
-        child: GestureDetector(
-          onTap: () {},
-          child: Stack(
-            children: [
-              _drawer(),
-              _child(),
-            ],
-          ),
-        ),
-      ),
+      body: StreamBuilder<bool>(
+          stream: presenter.drawerState.isOpended.stream,
+          builder: (context, snapshot) {
+            return WillPopScope(
+              onWillPop: () async {
+                if (snapshot.data) {
+                  presenter.toggleDrawer(snapshot.data);
+                  return false;
+                }
+                return true;
+              },
+              child: GestureDetector(
+                onTap: () {},
+                child: Stack(
+                  children: [
+                    _drawer(),
+                    _child(),
+                  ],
+                ),
+              ),
+            );
+          }),
     );
+  }
+
+  @override
+  void updateDrawerByGesture() {
+    setState(() {});
   }
 }
