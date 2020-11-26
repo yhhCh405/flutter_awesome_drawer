@@ -256,10 +256,8 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           child: GestureDetector(
             onHorizontalDragUpdate: presenter.handleChildUpdateGesture,
             onHorizontalDragEnd: presenter.handleChildEndGesture,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [_appbar, widget.child ?? Container()],
-              ),
+            child: Column(
+              children: [_appbar, widget.child ?? Container()],
             ),
           ),
         );
