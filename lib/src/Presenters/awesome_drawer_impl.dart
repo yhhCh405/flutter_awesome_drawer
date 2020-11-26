@@ -1,6 +1,7 @@
-import 'package:awesome_drawer/awesome_drawer/Models/drawer_properties.dart';
-import 'package:awesome_drawer/awesome_drawer/Models/drawer_state.dart';
-import 'package:awesome_drawer/awesome_drawer/Presenters/awesome_drawer_contract.dart';
+import 'package:awesome_drawer/src/Models/drawer_properties.dart';
+import 'package:awesome_drawer/src/Models/drawer_state.dart';
+import 'package:awesome_drawer/src/Models/drawer_type.dart';
+import 'package:awesome_drawer/src/Presenters/awesome_drawer_contract.dart';
 import 'package:flutter/cupertino.dart';
 
 class AwesomeDrawerPresenter implements AwesomeDrawerPresenterImpl {
@@ -70,7 +71,7 @@ class AwesomeDrawerPresenter implements AwesomeDrawerPresenterImpl {
     if (type == DrawerType.Slide) {
       return drawerProperties.opendedWidth;
     } else if (type == DrawerType.Scale) {
-      return 200;// drawerProperties.opendedWidth;
+      return 200; // drawerProperties.opendedWidth;
     }
     return 0;
   }

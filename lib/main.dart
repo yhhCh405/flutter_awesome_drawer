@@ -1,5 +1,4 @@
-import 'package:awesome_drawer/awesome_drawer/Models/drawer_items.dart';
-import 'package:awesome_drawer/awesome_drawer/Views/awesome_drawer.dart';
+import 'package:awesome_drawer/awesome_drawer.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -26,7 +25,11 @@ class MyHome extends StatelessWidget {
       ),
       drawerItems: [
         AwesomeDrawerItems(
-            icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
+            icon: Icon(Icons.wallet_giftcard),
+            child: Text("Gift card"),
+            onTap: () {
+              print("gcgcgc");
+            }),
         AwesomeDrawerItems(
             icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
         AwesomeDrawerItems(

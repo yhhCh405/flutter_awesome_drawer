@@ -1,7 +1,9 @@
-import 'package:awesome_drawer/awesome_drawer/Models/drawer_items.dart';
-import 'package:awesome_drawer/awesome_drawer/Models/drawer_state.dart';
-import 'package:awesome_drawer/awesome_drawer/Presenters/awesome_drawer_contract.dart';
-import 'package:awesome_drawer/awesome_drawer/Presenters/awesome_drawer_impl.dart';
+
+import 'package:awesome_drawer/src/Models/drawer_items.dart';
+import 'package:awesome_drawer/src/Models/drawer_state.dart';
+import 'package:awesome_drawer/src/Models/drawer_type.dart';
+import 'package:awesome_drawer/src/Presenters/awesome_drawer_contract.dart';
+import 'package:awesome_drawer/src/Presenters/awesome_drawer_impl.dart';
 
 ///Copyright 2020 by Ye Htet Hein. All rights reserved.
 
@@ -103,23 +105,26 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           width: presenter.drawerWidth(isopended.data, widget.type),
           height: presenter.drawerHeight(isopended.data, widget.type),
           color: Colors.blueGrey[800],
-          child: Container(
-            color: Colors.red,
-            width: presenter.drawerActualWidth(isopended.data, widget.type),
-            height: presenter.drawerHeight(isopended.data, widget.type),
-            child: widget.drawer ??
-                Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: presenter.fullHeight / 3.5,
-                      child: widget.drawerHeader ?? Container(),
+          child: Row(
+            children: [
+              Container(
+                width: presenter.drawerActualWidth(isopended.data, widget.type),
+                height: presenter.drawerHeight(isopended.data, widget.type),
+                child: widget.drawer ??
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          height: presenter.fullHeight / 3.5,
+                          child: widget.drawerHeader ?? Container(),
+                        ),
+                        SingleChildScrollView(
+                          child: _buildDrawerItems(),
+                        )
+                      ],
                     ),
-                    SingleChildScrollView(
-                      child: _buildDrawerItems(),
-                    )
-                  ],
-                ),
+              ),
+            ],
           ),
         );
       },
