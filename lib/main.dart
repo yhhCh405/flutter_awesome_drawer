@@ -14,11 +14,40 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHome extends StatelessWidget {
+class MyHome extends StatefulWidget {
+  @override
+  _MyHomeState createState() => _MyHomeState();
+}
+
+class _MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
+  TabController tabCtrl;
+  @override
+  void initState() {
+    super.initState();
+    tabCtrl = TabController(length: 3, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: AwesomeDrawer.slide(
+        // appBar: AppBar(
+        //   primary: true,
+        //   bottom: TabBar(
+        //     controller: tabCtrl,
+        //     tabs: [
+        //       Tab(
+        //         text: "Orange",
+        //       ),
+        //       Tab(
+        //         text: "Apple",
+        //       ),
+        //       Tab(
+        //         text: "Mango",
+        //       )
+        //     ],
+        //   ),
+        // ),
         drawerHeader: DrawerHeader(
           child: Center(
             child: Text("Hello"),
@@ -36,9 +65,36 @@ class MyHome extends StatelessWidget {
           AwesomeDrawerItems(
               icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
         ],
-        child: Center(
-          child: Text("Hello"),
-        ),
+        builder: (AwesomeDrawerCallback callback) {
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                title: Text("Hello"),
+                leading: IconButton(
+                  icon: Icon(Icons.menu),
+                  onPressed: () {
+                    callback.toggleDrawer(callback.isOpended);
+                  },
+                ),
+                 bottom: TabBar(
+            controller: tabCtrl,
+            tabs: [
+              Tab(
+                text: "Orange",
+              ),
+              Tab(
+                text: "Apple",
+              ),
+              Tab(
+                text: "Mango",
+              )
+            ],
+          ),
+              ),
+              SliverToBoxAdapter()
+            ],
+          );
+        },
       ),
     );
   }

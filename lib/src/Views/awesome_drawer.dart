@@ -1,3 +1,4 @@
+import 'package:awesome_drawer/awesome_drawer.dart';
 import 'package:awesome_drawer/src/Models/drawer_items.dart';
 import 'package:awesome_drawer/src/Models/drawer_type.dart';
 import 'package:awesome_drawer/src/Presenters/awesome_drawer_contract.dart';
@@ -6,8 +7,14 @@ import 'package:awesome_drawer/src/Presenters/awesome_drawer_impl.dart';
 ///Copyright 2020 by Ye Htet Hein. All rights reserved.
 import 'package:flutter/material.dart';
 
+typedef ChildBuilder = Widget Function(AwesomeDrawerCallback callback);
+
+// ignore: must_be_immutable
 class AwesomeDrawer extends StatefulWidget {
   final Widget child;
+
+  /// Use this instead of child when need to trace drawer state. Bool in the parameter is refer to drawer state.
+  final ChildBuilder builder;
 
   /// The children of drawer. Use with `drawerHeader`
   final List<AwesomeDrawerItems> drawerItems;
@@ -30,7 +37,24 @@ class AwesomeDrawer extends StatefulWidget {
 
   DrawerType _drawerType;
 
-  AwesomeDrawer(
+  AwesomeDrawer({
+    this.child,
+    this.drawerHeader,
+    this.drawerItems,
+    final DrawerType drawerType,
+    this.drawer,
+    this.childRadius,
+    this.appBar,
+    this.drawerPercent,
+    this.backgroundColor,
+    this.drawerHeaderSpaceColor,
+    this.drawerBodySpaceColor,
+    this.builder,
+  }) {
+    this._drawerType = drawerType ?? DrawerType.Slide;
+  }
+
+  AwesomeDrawer.builder(
       {this.child,
       this.drawerHeader,
       this.drawerItems,
@@ -41,6 +65,7 @@ class AwesomeDrawer extends StatefulWidget {
       this.drawerPercent,
       this.backgroundColor,
       this.drawerHeaderSpaceColor,
+      this.builder,
       this.drawerBodySpaceColor}) {
     this._drawerType = drawerType ?? DrawerType.Slide;
   }
@@ -55,6 +80,7 @@ class AwesomeDrawer extends StatefulWidget {
       this.drawerPercent,
       this.backgroundColor,
       this.drawerHeaderSpaceColor,
+      this.builder,
       this.drawerBodySpaceColor}) {
     this._drawerType = DrawerType.Slide;
   }
@@ -69,6 +95,7 @@ class AwesomeDrawer extends StatefulWidget {
       this.drawerPercent,
       this.backgroundColor,
       this.drawerHeaderSpaceColor,
+      this.builder,
       this.drawerBodySpaceColor}) {
     this._drawerType = DrawerType.Scale;
   }
@@ -169,7 +196,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
   }
 
   Widget _child() {
-    AppBar userAppBar;
+    Widget userAppBar;
     Widget _leading(bool isopended) => IconButton(
           icon: Icon(
             isopended ? Icons.close : Icons.menu,
@@ -209,6 +236,16 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
             leadingWidth: widget.appBar.leadingWidth,
             bottomOpacity: widget.appBar.bottomOpacity,
           );
+
+          final double topPadding =
+              widget.appBar.primary ? MediaQuery.of(context).padding.top : 0.0;
+          final double _appBarMaxHeight =
+              widget.appBar.preferredSize.height + topPadding;
+
+          userAppBar = ConstrainedBox(
+            child: userAppBar,
+            constraints: BoxConstraints(maxHeight: _appBarMaxHeight),
+          );
         }
         return AnimatedContainer(
           transform: Matrix4.identity(),
@@ -221,12 +258,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                 topRight: presenter
                     .childBorderRadius(isopended.data, widget.childRadius)
                     .topRight),
-            child: userAppBar ??
-                AppBar(
-                  backgroundColor: Colors.white,
-                  iconTheme: IconThemeData(color: Colors.black),
-                  leading: _leading(isopended.data),
-                ),
+            child: userAppBar ?? Container(),
           ),
         );
       },
@@ -258,25 +290,19 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                 Expanded(
                   child: Stack(
                     children: [
-                      widget.child ??
-                          Container(
-                            child: ListView(
-                              children: List<Widget>.generate(
-                                20,
-                                (index) => ListTile(
-                                  title: Text(
-                                    index.toString(),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                      widget.builder != null
+                          ? widget.builder(
+                              AwesomeDrawerCallback(
+                                  isOpended: isopended.data,
+                                  toggleDrawer: presenter.toggleDrawer),
+                            )
+                          : widget.child ?? Container(),
                       GestureDetector(
                         onHorizontalDragUpdate:
                             presenter.handleChildUpdateGesture,
                         onHorizontalDragEnd: presenter.handleChildEndGesture,
                         child: Container(
-                          width: 30,
+                          width: 20,
                           height: presenter.fullHeight,
                           color: Colors.transparent,
                         ),
