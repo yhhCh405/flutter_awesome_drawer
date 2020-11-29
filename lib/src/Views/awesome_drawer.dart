@@ -239,8 +239,6 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
         return AnimatedContainer(
           curve: Curves.easeInOut,
           duration: presenter.animDuration,
-          width: presenter.childWidth(isopended.data),
-          height: presenter.childHeight(isopended.data),
           transform: presenter.childTransform(isopended.data),
           decoration: BoxDecoration(
               borderRadius: presenter.childBorderRadius(
@@ -253,11 +251,40 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                     blurRadius: 5,
                     spreadRadius: 5),
               ]),
-          child: GestureDetector(
-            onHorizontalDragUpdate: presenter.handleChildUpdateGesture,
-            onHorizontalDragEnd: presenter.handleChildEndGesture,
+          child: Container(
             child: Column(
-              children: [_appbar, widget.child ?? Container()],
+              children: [
+                _appbar,
+                Expanded(
+                  child: Stack(
+                    children: [
+                      widget.child ??
+                          Container(
+                            child: ListView(
+                              children: List<Widget>.generate(
+                                20,
+                                (index) => ListTile(
+                                  title: Text(
+                                    index.toString(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      GestureDetector(
+                        onHorizontalDragUpdate:
+                            presenter.handleChildUpdateGesture,
+                        onHorizontalDragEnd: presenter.handleChildEndGesture,
+                        child: Container(
+                          width: 30,
+                          height: presenter.fullHeight,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         );

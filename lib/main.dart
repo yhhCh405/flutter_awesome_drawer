@@ -17,26 +17,28 @@ class MyApp extends StatelessWidget {
 class MyHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return AwesomeDrawer.scale(
-      drawerHeader: DrawerHeader(
+    return Scaffold(
+      body: AwesomeDrawer.slide(
+        drawerHeader: DrawerHeader(
+          child: Center(
+            child: Text("Hello"),
+          ),
+        ),
+        drawerItems: [
+          AwesomeDrawerItems(
+              icon: Icon(Icons.wallet_giftcard),
+              child: Text("Gift card"),
+              onTap: () {}),
+          AwesomeDrawerItems(
+              icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
+          AwesomeDrawerItems(
+              icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
+          AwesomeDrawerItems(
+              icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
+        ],
         child: Center(
           child: Text("Hello"),
         ),
-      ),
-      drawerItems: [
-        AwesomeDrawerItems(
-            icon: Icon(Icons.wallet_giftcard),
-            child: Text("Gift card"),
-            onTap: () {}),
-        AwesomeDrawerItems(
-            icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
-        AwesomeDrawerItems(
-            icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
-        AwesomeDrawerItems(
-            icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
-      ],
-      child: Center(
-        child: Text("Hello"),
       ),
     );
   }
