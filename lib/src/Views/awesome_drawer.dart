@@ -322,6 +322,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<bool>(
+          initialData: false,
           stream: presenter.drawerState.isOpended.stream,
           builder: (context, snapshot) {
             return WillPopScope(
