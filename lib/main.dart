@@ -65,18 +65,10 @@ class _MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
           AwesomeDrawerItems(
               icon: Icon(Icons.wallet_giftcard), child: Text("Gift card")),
         ],
-        builder: (AwesomeDrawerCallback callback) {
-          return CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                title: Text("Hello"),
-                leading: IconButton(
-                  icon: Icon(Icons.menu),
-                  onPressed: () {
-                    callback.toggleDrawer(callback.isOpended);
-                  },
-                ),
-                 bottom: TabBar(
+        appBar: AppBar(
+          elevation: 5,
+          title: Text("Hello"),
+          bottom: TabBar(
             controller: tabCtrl,
             tabs: [
               Tab(
@@ -90,11 +82,56 @@ class _MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
               )
             ],
           ),
-              ),
-              SliverToBoxAdapter()
-            ],
-          );
-        },
+        ),
+        child: Container(
+          color: Colors.green,
+          child: SingleChildScrollView(
+            child: Column(
+                children: List.generate(
+              100,
+              (index) => ListTile(
+                  title: Text(
+                index.toString(),
+                style: TextStyle(),
+              )),
+            )),
+          ),
+        ),
+        // builder: (AwesomeDrawerCallback callback) {
+        //   return CustomScrollView(
+        //     slivers: [
+        //       SliverAppBar(
+        //         elevation: 5,
+        //         title: Text("Hello"),
+        //         leading: IconButton(
+        //           icon: Icon(Icons.menu),
+        //           onPressed: () {
+        //             callback.toggleDrawer(callback.isOpended);
+        //           },
+        //         ),
+        //         bottom: TabBar(
+        //           controller: tabCtrl,
+        //           tabs: [
+        //             Tab(
+        //               text: "Orange",
+        //             ),
+        //             Tab(
+        //               text: "Apple",
+        //             ),
+        //             Tab(
+        //               text: "Mango",
+        //             )
+        //           ],
+        //         ),
+        //       ),
+        //       SliverToBoxAdapter(
+        //         child: Container(
+        //           color: Colors.green,
+        //         ),
+        //       )
+        //     ],
+        //   );
+        // },
       ),
     );
   }

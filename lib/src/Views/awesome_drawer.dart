@@ -206,6 +206,11 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           },
         );
 
+    final double topPadding =
+        widget.appBar.primary ? MediaQuery.of(context).padding.top : 0.0;
+    final double _appBarMaxHeight =
+        widget.appBar.preferredSize.height + topPadding;
+
     Widget _appbar = StreamBuilder<bool>(
       stream: presenter.drawerState.isOpended.stream,
       initialData: false,
@@ -237,11 +242,6 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
             bottomOpacity: widget.appBar.bottomOpacity,
           );
 
-          final double topPadding =
-              widget.appBar.primary ? MediaQuery.of(context).padding.top : 0.0;
-          final double _appBarMaxHeight =
-              widget.appBar.preferredSize.height + topPadding;
-
           userAppBar = ConstrainedBox(
             child: userAppBar,
             constraints: BoxConstraints(maxHeight: _appBarMaxHeight),
@@ -258,7 +258,10 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                 topRight: presenter
                     .childBorderRadius(isopended.data, widget.childRadius)
                     .topRight),
-            child: userAppBar ?? Container(),
+            child: userAppBar != null
+                ? Container(
+                    padding: EdgeInsets.only(bottom: 10), child: userAppBar)
+                : Container(),
           ),
         );
       },
@@ -286,17 +289,19 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           child: Container(
             child: Column(
               children: [
-                _appbar,
                 Expanded(
                   child: Stack(
                     children: [
-                      widget.builder != null
-                          ? widget.builder(
-                              AwesomeDrawerCallback(
-                                  isOpended: isopended.data,
-                                  toggleDrawer: presenter.toggleDrawer),
-                            )
-                          : widget.child ?? Container(),
+                      Padding(
+                        padding: EdgeInsets.only(top: _appBarMaxHeight),
+                        child: widget.builder != null
+                            ? widget.builder(
+                                AwesomeDrawerCallback(
+                                    isOpended: isopended.data,
+                                    toggleDrawer: presenter.toggleDrawer),
+                              )
+                            : widget.child ?? Container(),
+                      ),
                       GestureDetector(
                         onHorizontalDragUpdate:
                             presenter.handleChildUpdateGesture,
@@ -307,6 +312,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                           color: Colors.transparent,
                         ),
                       ),
+                      _appbar,
                     ],
                   ),
                 ),
