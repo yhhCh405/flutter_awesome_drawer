@@ -206,16 +206,17 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
           },
         );
 
-    final double topPadding =
-        widget.appBar.primary ? MediaQuery.of(context).padding.top : 0.0;
-    final double _appBarMaxHeight =
-        widget.appBar.preferredSize.height + topPadding;
+    double _appBarMaxHeight;
 
     Widget _appbar = StreamBuilder<bool>(
       stream: presenter.drawerState.isOpended.stream,
       initialData: false,
       builder: (context, isopended) {
         if (widget.appBar != null) {
+          final double topPadding =
+              widget.appBar.primary ? MediaQuery.of(context).padding.top : 0.0;
+          _appBarMaxHeight = widget.appBar.preferredSize.height + topPadding;
+
           userAppBar = AppBar(
             leading: _leading(isopended.data),
             key: widget.appBar.key,
@@ -293,7 +294,7 @@ class _AwesomeDrawerState extends State<AwesomeDrawer>
                   child: Stack(
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(top: _appBarMaxHeight),
+                        padding: EdgeInsets.only(top: _appBarMaxHeight ?? 0),
                         child: widget.builder != null
                             ? widget.builder(
                                 AwesomeDrawerCallback(
